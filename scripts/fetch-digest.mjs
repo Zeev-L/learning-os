@@ -11,7 +11,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Parser from "rss-parser";
-import { fetchMailItems } from "./lib-mail.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -98,10 +97,6 @@ for (const s of SOURCES) {
     console.log(`${count} חדשים`);
   } catch (e) { console.log(`שגיאה (${e.message})`); }
 }
-
-// ניוזלטרים מהמייל (אם IMAP מוגדר ב-.env)
-const mailItems = await fetchMailItems({ since: SINCE, sources: SOURCES, summarize });
-fresh.push(...mailItems);
 
 // מיזוג: manual תמיד נשמרים וראשונים; השאר לפי תאריך
 const freshFiltered = fresh.filter(f => !existing.some(e => e.sourceUrl === f.sourceUrl));
