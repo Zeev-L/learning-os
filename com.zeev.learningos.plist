@@ -14,8 +14,8 @@
   <string>com.zeev.learningos</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/usr/local/bin/node</string>
-    <string>/Users/sarit/Desktop/learning-os/scripts/fetch-digest.mjs</string>
+    <string>/bin/bash</string>
+    <string>/Users/sarit/Desktop/learning-os/scripts/auto-refresh.sh</string>
   </array>
   <key>WorkingDirectory</key>
   <string>/Users/sarit/Desktop/learning-os</string>
