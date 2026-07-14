@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מערכת הלמידה שלי</title>
+<style>
+:root{
+  --bg:#f7f6f3; --surface:#ffffff; --surface-2:#f1efe9;
+  --text:#1f1e1c; --text-2:#5f5e5a; --text-3:#8a8983;
+  --border:#e9e6de; --border-2:#d8d5cb; --accent:#0f6e56; --accent-bg:#e1f5ee;
+  --ai:#534ab7; --ai-bg:#eeedfe; --pm:#0f6e56; --pm-bg:#e1f5ee;
+  --rd:#185fa5; --rd-bg:#e6f1fb; --st:#854f0b; --st-bg:#faeeda;
+  --radius:10px; --shadow:0 1px 2px rgba(0,0,0,.04),0 1px 3px rgba(0,0,0,.03);
+}
+@media (prefers-color-scheme: dark){
+:root{
+  --bg:#191817; --surface:#232120; --surface-2:#2c2a28;
+  --text:#f0eee9; --text-2:#b4b2a9; --text-3:#8a8880;
+  --border:#38352f; --border-2:#4a4741; --accent:#5dcaa5; --accent-bg:#0f3d31;
+  --ai:#afa9ec; --ai-bg:#2a2660; --pm:#5dcaa5; --pm-bg:#0f3d31;
+  --rd:#85b7eb; --rd-bg:#0c3050; --st:#efab3f; --st-bg:#4a2f06;
+  --shadow:0 1px 2px rgba(0,0,0,.25);
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Assistant","Rubik",Arial,sans-serif;
+  line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:28px 20px 70px}
+header{margin-bottom:18px}
+.h-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:600}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.whisper{font-size:12.5px;color:var(--text-3)}
+.sub{font-size:13.5px;color:var(--text-2);margin-top:5px}
+/* tabs */
+.tabs{display:flex;gap:4px;margin:18px 0 22px;border-bottom:1px solid var(--border)}
+.tab{font-size:15px;font-weight:500;padding:9px 16px;border:0;background:none;color:var(--text-3);
+  cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s}
+.tab:hover{color:var(--text-2)}
+.tab[aria-selected="true"]{color:var(--text);border-bottom-color:var(--accent);font-weight:600}
+.panel{display:none}
+.panel.active{display:block}
+/* filters */
+.filters{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.pill{font-size:13px;padding:6px 13px;border-radius:99px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text-2);cursor:pointer;transition:.15s}
+.pill:hover{border-color:var(--border-2)}
+.pill[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.spacer{flex:1}
+.toggle{display:flex;border:1px solid var(--border);border-radius:99px;overflow:hidden}
+.toggle button{font-size:12.5px;padding:6px 12px;border:0;background:var(--surface);color:var(--text-2);cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--surface-2);color:var(--text);font-weight:500}
+.count{font-size:12.5px;color:var(--text-3);margin-bottom:12px}
+/* cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow)}
+.dig-grid{display:grid;gap:13px}
+.dig{padding:16px 18px;transition:opacity .2s}
+.dig.read{opacity:.55}
+.dig-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.tag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px}
+.tag.ai{color:var(--ai);background:var(--ai-bg)} .tag.pm{color:var(--pm);background:var(--pm-bg)}
+.tag.rd{color:var(--rd);background:var(--rd-bg)} .tag.st{color:var(--st);background:var(--st-bg)}
+.dig-meta{font-size:12.5px;color:var(--text-3);display:inline-flex;flex-wrap:wrap;gap:6px;align-items:baseline}
+.dig-meta bdi{unicode-bidi:isolate}
+.dig-meta .sep{color:var(--text-3);opacity:.7}
+.udot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-inline-start:auto;flex-shrink:0}
+.dig.read .udot{display:none}
+.dig-title{font-size:16px;font-weight:600;margin:0 0 7px;line-height:1.4}
+.dig-tldr{font-size:14px;color:var(--text-2);line-height:1.7;margin:0 0 12px}
+.dig-bottom{font-size:14.5px;font-weight:500;line-height:1.55;margin:0 0 11px;padding-inline-start:11px;border-inline-start:3px solid var(--accent);border-radius:0}
+.dig-bottom .bl-lbl{display:block;font-size:10.5px;font-weight:600;color:var(--accent);letter-spacing:.02em;margin-bottom:2px}
+.dig-impl{font-size:13.5px;line-height:1.65;background:var(--accent-bg);border-radius:9px;padding:9px 12px;margin-bottom:11px}
+.dig-impl .lbl{font-weight:600;color:var(--accent);margin-inline-end:6px}
+details.acts{margin-bottom:12px}
+details.acts summary{list-style:none;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--text);
+  display:flex;align-items:center;gap:6px;padding:2px 0}
+details.acts summary::-webkit-details-marker{display:none}
+details.acts summary::before{content:"‹";display:inline-block;transition:.15s;font-size:16px;color:var(--text-3)}
+details.acts[open] summary::before{transform:rotate(-90deg)}
+details.acts ul{margin:8px 0 0;padding-inline-start:20px}
+details.acts li{font-size:13.5px;color:var(--text-2);line-height:1.6;margin-bottom:5px}
+.dig-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+  border-top:1px solid var(--border);padding-top:11px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:4px 10px;border-radius:99px;
+  border:1px solid var(--border);color:var(--text-2);background:var(--surface);text-decoration:none;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--border-2);color:var(--text)}
+.chip.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip.mono{font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+.mark{font-size:12px;padding:5px 11px;border-radius:99px;border:1px solid var(--border);
+  background:none;color:var(--text-3);cursor:pointer;white-space:nowrap}
+.mark:hover{border-color:var(--border-2);color:var(--text-2)}
+.dig.read .mark{color:var(--accent);border-color:var(--accent)}
+.empty{font-size:14px;color:var(--text-3);padding:32px;text-align:center;background:var(--surface);
+  border:1px dashed var(--border-2);border-radius:12px}
+/* baseline */
+.prog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.prog-label{font-size:13.5px;color:var(--text-2);font-weight:500}
+.prog-track{height:7px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-bottom:18px}
+.prog-bar{height:100%;background:var(--accent);border-radius:99px;transition:width .35s ease}
+.base-grid{display:grid;gap:9px}
+.base-item{display:flex;gap:13px;align-items:flex-start;padding:13px 15px}
+.cb{appearance:none;-webkit-appearance:none;min-width:19px;height:19px;margin-top:2px;border:1.5px solid var(--border-2);
+  border-radius:6px;cursor:pointer;position:relative;background:var(--surface);transition:.15s}
+.cb:checked{background:var(--accent);border-color:var(--accent)}
+.cb:checked::after{content:"";position:absolute;inset:0;background:no-repeat center/12px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E")}
+.base-item.done .bi-title{color:var(--text-3);text-decoration:line-through}
+.bi-title{font-size:14.5px;font-weight:600}
+.bi-desc{font-size:13px;color:var(--text-2);margin:3px 0 9px;line-height:1.6}
+/* sources */
+.src-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.search{flex:1;min-width:180px;font-size:14px;padding:8px 12px;border:1px solid var(--border);
+  border-radius:var(--radius);background:var(--surface);color:var(--text)}
+.search:focus{outline:none;border-color:var(--accent)}
+.src-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:9px}
+.src{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.src-name-wrap{position:relative;min-width:0}
+.src-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src-tip{pointer-events:none;position:absolute;right:0;top:100%;z-index:20;margin-top:4px;display:none;
+  max-width:280px;white-space:normal;background:var(--text);color:var(--bg);font-size:12px;font-weight:400;
+  padding:6px 9px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.src-name-wrap:hover .src-tip{display:block}
+.src-meta{font-size:11.5px;color:var(--text-3);margin-top:2px}
+.src-badges{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+.badge{font-size:10.5px;padding:2px 7px;border-radius:99px;background:var(--surface-2);color:var(--text-3)}
+.badge.start{background:var(--accent-bg);color:var(--accent)}
+.badge.il{background:var(--rd-bg);color:var(--rd)}
+.badge.email{background:var(--st-bg);color:var(--st)}
+.src-link{color:var(--text-3);text-decoration:none;font-size:17px;flex-shrink:0}
+.src-link:hover{color:var(--accent)}
+.foot{margin-top:22px;padding:12px 15px;border:1px dashed var(--border-2);border-radius:12px;
+  font-size:12.5px;color:var(--text-2)}
+.tts-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:4px;
+  background:var(--surface);border:1px solid var(--border-2);border-radius:99px;padding:5px 7px;box-shadow:0 4px 18px rgba(0,0,0,.16)}
+.tts-bar button{border:0;background:none;color:var(--text-2);cursor:pointer;font-size:13.5px;padding:6px 11px;border-radius:99px;white-space:nowrap}
+.tts-bar button:hover{background:var(--surface-2);color:var(--text)}
+.tts-sel{position:absolute;z-index:60;display:none;background:var(--accent);color:#fff;border:0;border-radius:99px;
+  font-size:12.5px;padding:5px 12px;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.25)}
+.reading{outline:2px solid var(--accent);outline-offset:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="h-top">
+      <div class="brand"><span class="dot"></span>מערכת הלמידה שלי</div>
+      <div class="whisper" id="whisper"></div>
+    </div>
+    <div class="sub">התחל מהבייסליין, סמן מה שכבר הטמעת, והמשך ל-Digest — סיכום עברי עם משמעויות והמלצות פרקטיות.</div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-tab="digest">◆ Digest</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="baseline">✓ בייסליין</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="sources">▤ מקורות</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="archive">▦ ארכיון</button>
+  </div>
+
+  <!-- ===== DIGEST ===== -->
+  <section class="panel active" id="panel-digest">
+    <div class="filters" id="dig-filters">
+      <span class="pill" data-f="all" aria-pressed="true">הכל</span>
+      <span class="pill" data-f="ai" aria-pressed="false">AI</span>
+      <span class="pill" data-f="pm" aria-pressed="false">Product</span>
+      <span class="pill" data-f="rd" aria-pressed="false">R&D / Eng Ops</span>
+      <span class="pill" data-f="st" aria-pressed="false">Project / Strategy</span>
+      <span class="spacer"></span>
+      <div class="toggle" id="range-toggle">
+        <button data-k="week" aria-pressed="true">עדכני</button>
+        <button data-k="day" aria-pressed="false">היום</button>
+      </div>
+    </div>
+    <div class="count" id="dig-count"></div>
+    <div class="dig-grid" id="digest"></div>
+  </section>
+
+  <!-- ===== BASELINE ===== -->
+  <section class="panel" id="panel-baseline">
+    <div class="prog-head">
+      <div class="prog-label">בסט-פרקטיסז לעבודה עם AI — סמן מה שכבר הטמעת</div>
+      <div class="prog-label" id="prog-label">0 / 0</div>
+    </div>
+    <div class="prog-track"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+    <div class="base-grid" id="baseline"></div>
+  </section>
+
+  <!-- ===== SOURCES ===== -->
+  <section class="panel" id="panel-sources">
+    <div class="src-tools">
+      <input class="search" id="src-search" type="search" placeholder="חיפוש מקור, מחבר או תחום…">
+      <span class="pill" data-sf="all" aria-pressed="true">הכל</span>
+      <span class="pill" data-sf="start" aria-pressed="false">התחל כאן</span>
+      <span class="pill" data-sf="email" aria-pressed="false">כדאי במייל</span>
+      <span class="pill" data-sf="il" aria-pressed="false">ישראל</span>
+    </div>
+    <div class="src-grid" id="sources"></div>
+    <div class="foot">⧉ שלב 2 — LinkedIn · X · Luma · ניוזלטרים במייל ייכנסו אוטומטית ל-Digest בהמשך.</div>
+  </section>
+
+  <!-- ===== ARCHIVE ===== -->
+  <section class="panel" id="panel-archive">
+    <div class="count" style="margin-bottom:14px">פריטים שהתיישנו מה-Digest (מעל 14 יום) — נשמרים כאן, שום דבר לא נעלם.</div>
+    <div class="filters" id="archive-filters">
+      <span class="pill" data-af="all" aria-pressed="true">הכל</span>
+      <span class="pill" data-af="ai" aria-pressed="false">AI</span>
+      <span class="pill" data-af="pm" aria-pressed="false">Product</span>
+      <span class="pill" data-af="rd" aria-pressed="false">R&D / Eng Ops</span>
+      <span class="pill" data-af="st" aria-pressed="false">Project / Strategy</span>
+    </div>
+    <div class="count" id="archive-count"></div>
+    <div class="dig-grid" id="archive"></div>
+  </section>
+</div>
+
+<div class="tts-bar" id="tts-bar">
+  <button id="tts-play">▶ הקראה</button>
+  <button id="tts-stop" style="display:none">⏹ עצור</button>
+  <button id="tts-rate">1×</button>
+</div>
+<button class="tts-sel" id="tts-sel">▶ הקרא מכאן</button>
+
+<script src="data/baseline.js"></script>
+<script src="data/sources.js"></script>
+<script src="data/digest.js"></script>
+<script>
+const DOMAIN_HE={ai:"AI",pm:"Product",rd:"R&D / Eng Ops",st:"Project / Strategy"};
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const HE_MONTHS=["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+const heDate=iso=>{if(!iso||!/^\d{4}-\d{2}-\d{2}/.test(iso))return "";const[y,m,d]=iso.split("-").map(Number);return `${d} ב${HE_MONTHS[m-1]} ${y}`;};
+const LS=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||d)}catch{return JSON.parse(d)}};
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+
+/* ---------- tabs ---------- */
+document.querySelector('.tabs').addEventListener('click',e=>{
+  const t=e.target.closest('.tab'); if(!t)return;
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===t));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+t.dataset.tab));
+  window.scrollTo(0,0);
+});
+
+/* ---------- digest ---------- */
+let digFilter="all", digRange="week";
+const readMap=LS('learning-os-read','{}');
+function cardHtml(x){
+  const links=(x.links||[]).map(l=>`<a class="chip" href="${esc(l.url)}" target="_blank" rel="noopener">↗ ${esc(l.label)}</a>`).join("");
+  const impl=x.implications?`<div class="dig-impl"><span class="lbl">משמעויות</span>${esc(x.implications)}</div>`:"";
+  let acts="";
+  if(x.actions&&x.actions.length){
+    const label=x.actionsKind==="deepen"?"נקודות להעמיק":"המלצות פרקטיות";
+    acts=`<details class="acts"><summary>${label} (${x.actions.length})</summary><ul>${x.actions.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></details>`;
+  }
+  const read=readMap[x.sourceUrl];
+  const meta=[esc(x.source), x.date?esc(heDate(x.date)):null, x.readMin?`${x.readMin} דק׳ קריאה`:null, x.mail?"✉ מייל":null].filter(Boolean).map(p=>`<bdi>${p}</bdi>`).join('<span class="sep">·</span>');
+  return `<article class="card dig ${read?"read":""}" data-url="${esc(x.sourceUrl)}">
+    <div class="dig-head">
+      <span class="tag ${x.domain}">${esc(DOMAIN_HE[x.domain]||x.domain)}</span>
+      <span class="dig-meta">${meta}</span>
+      <span class="udot"></span>
+    </div>
+    <h3 class="dig-title">${esc(x.title)}</h3>
+    ${x.bottomLine?`<div class="dig-bottom"><span class="bl-lbl">שורה תחתונה</span>${esc(x.bottomLine)}</div>`:""}
+    <p class="dig-tldr">${esc(x.tldr)}</p>
+    ${impl}
+    ${acts}
+    <div class="dig-foot">
+      <div class="chips"><a class="chip primary" href="${esc(x.sourceUrl)}" target="_blank" rel="noopener">קריאה במקור ↗</a>${links}</div>
+      <button class="mark" data-mark>${read?"✓ נקרא":"סמן כנקרא"}</button>
+    </div>
+  </article>`;
+}
+function renderDigest(){
+  const all=(window.DIGEST&&DIGEST.items)||[];
+  const maxDate=all.reduce((m,x)=>(x.date>m?x.date:m),"0000-00-00");
+  const days=digRange==="day"?2:14;
+  const cutoff=new Date(Date.parse(maxDate)-days*864e5).toISOString().slice(0,10);
+  const items=all.filter(x=>(x.date||"")>=cutoff).filter(x=>digFilter==="all"||x.domain===digFilter);
+  const el=document.getElementById('digest');
+  const readN=all.filter(x=>readMap[x.sourceUrl]).length;
+  document.getElementById('dig-count').textContent=`${items.length} פריטים · ${digRange==="day"?"48 שעות אחרונות":"שבועיים אחרונים"}`;
+  document.getElementById('whisper').textContent=`נקראו ${readN} מתוך ${all.length}`;
+  if(!items.length){el.innerHTML=`<div class="empty">אין פריטים בקטגוריה הזו כרגע.<br>נסה טווח "עדכני" או תחום אחר.</div>`;return;}
+  el.innerHTML=items.map(cardHtml).join("");
+}
+/* ---------- archive (פריטי Digest שהתיישנו, מעל 14 יום) ---------- */
+let archiveFilter="all";
+function renderArchive(){
+  const all=(window.DIGEST&&DIGEST.items)||[];
+  const maxDate=all.reduce((m,x)=>(x.date>m?x.date:m),"0000-00-00");
+  const cutoff=new Date(Date.parse(maxDate)-14*864e5).toISOString().slice(0,10);
+  const items=all.filter(x=>(x.date||"")<cutoff).filter(x=>archiveFilter==="all"||x.domain===archiveFilter);
+  document.getElementById('archive-count').textContent=`${items.length} פריטים · לפני ${heDate(cutoff)}`;
+  const el=document.getElementById('archive');
+  el.innerHTML=items.length?items.map(cardHtml).join(""):`<div class="empty">אין עדיין פריטים בארכיון (הכל בתוך 14 הימים האחרונים).</div>`;
+}
+document.getElementById('archive-filters').addEventListener('click',e=>{
+  const p=e.target.closest('.pill');if(!p)return;
+  archiveFilter=p.dataset.af;
+  document.querySelectorAll('#archive-filters .pill').forEach(x=>x.setAttribute('aria-pressed',x===p));
+  renderArchive();
+});
+document.getElementById('dig-filters').addEventListener('click',e=>{
+  const p=e.target.closest('.pill');if(!p)return;
+  digFilter=p.dataset.f;
+  document.querySelectorAll('#dig-filters .pill').forEach(x=>x.setAttribute('aria-pressed',x===p));
+  renderDigest();
+});
+document.getElementById('range-toggle').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  digRange=b.dataset.k;
+  document.querySelectorAll('#range-toggle button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  renderDigest();
+});
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('[data-mark]');if(!btn)return;
+  const card=btn.closest('.dig'),url=card.dataset.url;
+  readMap[url]=!readMap[url]; save('learning-os-read',readMap);
+  card.classList.toggle('read',readMap[url]);
+  btn.textContent=readMap[url]?"✓ נקרא":"סמן כנקרא";
+  const readN=((window.DIGEST&&DIGEST.items)||[]).filter(x=>readMap[x.sourceUrl]).length;
+  document.getElementById('whisper').textContent=`נקראו ${readN} מתוך ${(DIGEST.items||[]).length}`;
+});
+
+/* ---------- baseline ---------- */
+const done=LS('learning-os-baseline','{}');
+function renderBaseline(){
+  const items=(window.BASELINE&&BASELINE.items)||[];
+  document.getElementById('baseline').innerHTML=items.map(it=>{
+    const chips=[
+      `<a class="chip" href="${esc(it.docUrl)}" target="_blank" rel="noopener">📖 ${esc(it.docLabel||"תיעוד")}</a>`,
+      it.cmd?`<span class="chip mono" data-copy="${esc(it.cmd)}">⧉ ${esc(it.cmd)}</span>`:""
+    ].join("");
+    return `<div class="card base-item ${done[it.id]?"done":""}" data-id="${esc(it.id)}">
+      <input type="checkbox" class="cb" ${done[it.id]?"checked":""} aria-label="${esc(it.title)}">
+      <div style="flex:1;min-width:0">
+        <div class="bi-title">${esc(it.title)}</div>
+        <div class="bi-desc">${esc(it.desc)}</div>
+        ${it.how?`<details class="acts" style="margin:0 0 9px"><summary>איך עושים</summary><div style="font-size:13px;color:var(--text-2);line-height:1.65;margin-top:6px">${esc(it.how)}</div></details>`:""}
+        <div class="chips">${chips}</div>
+      </div></div>`;
+  }).join("");
+  updateProgress();
+}
+function updateProgress(){
+  const items=(window.BASELINE&&BASELINE.items)||[];
+  const n=items.filter(it=>done[it.id]).length,t=items.length;
+  document.getElementById('prog-label').textContent=`${n} / ${t} הוטמעו`;
+  document.getElementById('prog-bar').style.width=(t?Math.round(n/t*100):0)+"%";
+}
+document.getElementById('baseline').addEventListener('change',e=>{
+  if(!e.target.classList.contains('cb'))return;
+  const card=e.target.closest('.base-item'),id=card.dataset.id;
+  done[id]=e.target.checked; save('learning-os-baseline',done);
+  card.classList.toggle('done',e.target.checked); updateProgress();
+});
+
+/* ---------- sources ---------- */
+let srcFilter="all",srcQuery="";
+function renderSources(){
+  const items=((window.SOURCES&&SOURCES.items)||[]).filter(s=>{
+    if(srcFilter==="start"&&s.tier!=="start")return false;
+    if(srcFilter==="il"&&s.region!=="il")return false;
+    if(srcFilter==="email"&&!(s.emailValue==="high"||s.emailValue==="email-only"))return false;
+    if(srcQuery){const hay=(s.name+" "+s.author+" "+DOMAIN_HE[s.domain]+" "+s.platform+" "+s.why).toLowerCase();if(!hay.includes(srcQuery))return false;}
+    return true;
+  });
+  const el=document.getElementById('sources');
+  if(!items.length){el.innerHTML=`<div class="empty">לא נמצאו מקורות תואמים.</div>`;return;}
+  el.innerHTML=items.map(s=>{
+    const emailBadge=s.emailValue==="email-only"?`<span class="badge email">מייל בלבד</span>`:s.emailValue==="high"?`<span class="badge email">כדאי במייל</span>`:"";
+    const feedBadge=s.rss?`<span class="badge">RSS</span>`:s.emailValue==="email-only"?"":`<span class="badge">חברתי</span>`;
+    const badges=[s.tier==="start"?`<span class="badge start">התחל כאן</span>`:"",`<span class="badge">${esc(DOMAIN_HE[s.domain])}</span>`,s.region==="il"?`<span class="badge il">ישראל</span>`:"",feedBadge,emailBadge].join("");
+    return `<div class="card src">
+      <div class="src-name-wrap">
+        <div class="src-name">${esc(s.name)}</div>
+        <span class="src-tip" role="tooltip">${esc(s.name)} — ${esc(s.why)}</span>
+        <div class="src-meta">${esc(s.author)} · ${esc(s.platform)}</div>
+        <div class="src-badges">${badges}</div>
+      </div>
+      <a class="src-link" href="${esc(s.url)}" target="_blank" rel="noopener" aria-label="פתח ${esc(s.name)}">↗</a>
+    </div>`;
+  }).join("");
+}
+document.getElementById('src-search').addEventListener('input',e=>{srcQuery=e.target.value.trim().toLowerCase();renderSources();});
+document.querySelector('.src-tools').addEventListener('click',e=>{
+  const p=e.target.closest('.pill');if(!p)return;
+  srcFilter=p.dataset.sf;
+  document.querySelectorAll('.src-tools .pill').forEach(x=>x.setAttribute('aria-pressed',x===p));
+  renderSources();
+});
+
+/* ---------- copy chips ---------- */
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-copy]');if(!c)return;
+  const orig=c.innerHTML;navigator.clipboard?.writeText(c.dataset.copy).catch(()=>{});
+  c.innerHTML="✓ הועתק";setTimeout(()=>c.innerHTML=orig,1200);
+});
+
+renderDigest();renderBaseline();renderSources();renderArchive();
+
+/* ---------- הקראה קולית (TTS) — ברמת פסקה, מתחיל בדיוק מהבחירה ---------- */
+(function(){
+  const synth=window.speechSynthesis;
+  const bar=document.getElementById('tts-bar');
+  if(!synth){ bar.style.display='none'; return; }
+  const playBtn=document.getElementById('tts-play'), stopBtn=document.getElementById('tts-stop'),
+        rateBtn=document.getElementById('tts-rate'), selBtn=document.getElementById('tts-sel');
+  const SEG='.dig-title,.dig-bottom,.dig-tldr,.dig-impl,details.acts li,.bi-title,.bi-desc,.src-name,.src-tip';
+  let segs=[], idx=0, startIdx=0, override=null, state='idle', rate=1;
+  const heVoice=()=>{const v=synth.getVoices();return v.find(x=>/^he/i.test(x.lang))||null;};
+  const collect=()=>[...document.querySelector('.panel.active').querySelectorAll(SEG)];
+  function segText(el){ let t=(el.textContent||'').replace(/\s+/g,' ').trim();
+    if(el.classList.contains('dig-bottom')) t=t.replace(/^שורה תחתונה\s*/,'שורה תחתונה. '); return t; }
+  function speak(){
+    if(idx>=segs.length){ stop(); return; }
+    const el=segs[idx];
+    const txt=(idx===startIdx && override!=null)?override:segText(el);
+    if(!txt){ idx++; return speak(); }
+    segs.forEach(s=>s.classList.remove('reading')); el.classList.add('reading');
+    const dt=el.closest('details.acts'); if(dt)dt.open=true;
+    el.scrollIntoView({block:'center',behavior:'smooth'});
+    const u=new SpeechSynthesisUtterance(txt); u.lang='he-IL'; u.rate=rate;
+    const v=heVoice(); if(v)u.voice=v;
+    u.onend=()=>{ if(state==='playing'){ idx++; override=null; speak(); } };
+    synth.speak(u);
+  }
+  function play(from, ov){ segs=collect(); if(!segs.length)return;
+    startIdx=from!=null?from:(state==='idle'?0:idx); idx=startIdx; override=ov!=null?ov:null;
+    synth.cancel(); state='playing'; speak(); render(); }
+  function pause(){ state='paused'; synth.pause(); render(); }
+  function resume(){ state='playing'; synth.resume(); render(); }
+  function stop(){ state='idle'; synth.cancel(); segs.forEach(s=>s.classList.remove('reading')); idx=0; render(); }
+  function render(){ playBtn.textContent=state==='playing'?'⏸ השהה':(state==='paused'?'▶ המשך':'▶ הקראה');
+    stopBtn.style.display=state==='idle'?'none':'inline-block'; }
+  playBtn.onclick=()=>{ state==='playing'?pause():state==='paused'?resume():play(); };
+  stopBtn.onclick=stop;
+  rateBtn.onclick=()=>{ rate=rate>=1.5?1:+(rate+0.25).toFixed(2); rateBtn.textContent=rate+'×'; if(state==='playing'){ synth.cancel(); speak(); } };
+  document.addEventListener('mouseup',()=>setTimeout(()=>{
+    const s=window.getSelection(), txt=(s?s.toString():'').trim();
+    if(txt.length>1 && s.anchorNode){
+      const node=s.anchorNode.nodeType===1?s.anchorNode:s.anchorNode.parentElement;
+      const seg=node&&node.closest(SEG);
+      if(seg){ const r=s.getRangeAt(0).getBoundingClientRect();
+        selBtn.style.top=(window.scrollY+r.top-40)+'px'; selBtn.style.left=(window.scrollX+r.left)+'px';
+        selBtn.style.display='block'; selBtn._seg=seg; selBtn._txt=txt; return; } }
+    selBtn.style.display='none';
+  },10));
+  selBtn.onmousedown=e=>e.preventDefault();
+  selBtn.onclick=()=>{
+    const seg=selBtn._seg, txt=(selBtn._txt||'').replace(/\s+/g,' ').trim();
+    selBtn.style.display='none';
+    const list=collect(); const i=seg?list.indexOf(seg):-1;
+    let ov=null;
+    if(i>=0 && txt){ const full=(seg.textContent||'').replace(/\s+/g,' ').trim();
+      const pos=full.indexOf(txt.slice(0,24)); if(pos>0) ov=full.slice(pos); }
+    window.getSelection().removeAllRanges();
+    play(i<0?0:i, ov);
+  };
+  document.addEventListener('scroll',()=>{ selBtn.style.display='none'; });
+  document.querySelector('.tabs').addEventListener('click',()=>{ if(state!=='idle')stop(); });
+  render();
+})();
+</script>
+</body>
+</html>
