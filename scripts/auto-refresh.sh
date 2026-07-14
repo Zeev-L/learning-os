@@ -4,7 +4,8 @@
 set -uo pipefail
 export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"   # launchd מריץ עם PATH מינימלי — צריך node+claude+gh
 
-REPO="$HOME/Desktop/learning-os"
+# מזהה את מיקום ה-repo מהסקריפט עצמו — עובד בכל נתיב/יוזר/מכונה
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG="$REPO/auto-refresh.log"
 cd "$REPO" || { echo "no repo at $REPO" >&2; exit 1; }
 

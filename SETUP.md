@@ -15,6 +15,14 @@
    הרענון מושך **RSS** (מ-`data/sources.js`) **+ GitHub Trending**, מסכם לעברית, ומעדכן את `data/digest.js`.
    לעדכון הגרסה החיה: `git add -A && git commit -m "refresh" && git push`.
 
+## רענון אוטומטי שבועי (אופציונלי — בלי מפתח API)
+כדי שהרענון ירוץ לבד כל שבוע:
+1. ודא ש-claude CLI מותקן: `npm install -g @anthropic-ai/claude-code`, והתחבר: `claude`.
+2. **בדיקה ידנית ראשונה:** `bash scripts/auto-refresh.sh` (צפה ב-`auto-refresh.log` ובאתר החי).
+3. אם הצליח — הפעל תזמון: `bash scripts/install-schedule.sh` (רץ כל ראשון 08:00).
+ה-plist נוצר **דינמית לפי היוזר/הנתיב**, אז עובד בכל מכונה/יוזר בלי עריכה. דורש: המחשב דלוק בזמן הריצה.
+להסרה: `launchctl unload ~/Library/LaunchAgents/com.zeev.learningos.plist`.
+
 ## המקורות נשמרים אוטומטית
 כל המקורות (`data/sources.js`), הבייסליין, וההיסטוריה (`data/digest.js`) יושבים ב-repo —
 ה-clone מביא את הכל, אז המערכת ממשיכה למשוך **בדיוק את אותם מקורות**, בכל מכונה, בלי שום התחברות.
