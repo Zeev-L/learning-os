@@ -1,27 +1,34 @@
-// baseline.js — בסט-פרקטיסז לעבודה עם AI (Claude), עדכון יולי 2026.
+// baseline.js — בסט-פרקטיסז לעבודה עם AI (Claude). אומת מול התיעוד הרשמי — 14 ביולי 2026.
 // לכל פריט: title, desc (מה+למה), how (איך עושים — פשוט אך מפורט), docUrl, docLabel?, cmd?
 window.BASELINE = {
-  updatedAt: "2026-07-13",
+  updatedAt: "2026-07-14",
   items: [
     {
       id: "claude-md",
       title: "כתוב CLAUDE.md אפקטיבי",
       desc: "קובץ הנחיות שהמודל קורא בתחילת כל שיחה. בלעדיו אתה מסביר את אותם דברים שוב ושוב, והמודל מנחש.",
-      how: "הרץ /init בתיקיית הפרויקט — Claude סורק את הקוד ומייצר CLAUDE.md התחלתי. ערוך: שמור מתחת ל-200 שורות, כתוב הוראות שאפשר לאמת (\"הרץ npm test לפני commit\", לא \"תבדוק את הקוד\"). כשהמודל טועה פעמיים באותו דבר — הוסף שורה. מיקומים: ./CLAUDE.md (משותף בגיט), ~/.claude/CLAUDE.md (אישי). ב-2026 יש גם זיכרון אוטומטי — צפה/ערוך עם /memory.",
+      how: "הרץ /init בתיקיית הפרויקט — Claude סורק את הקוד ומייצר CLAUDE.md התחלתי. ערוך: שמור מתחת ל-200 שורות, כתוב הוראות שאפשר לאמת (\"הרץ npm test לפני commit\", לא \"תבדוק את הקוד\"). כשהמודל טועה פעמיים באותו דבר — הוסף שורה. מיקומים: ./CLAUDE.md (משותף בגיט), ~/.claude/CLAUDE.md (אישי). ב-2026 יש גם זיכרון אוטומטי — צפה/ערוך עם /memory. לקבצים גדולים: פצל הוראות ל-.claude/rules/ עם `paths:` כדי שכלל ייטען רק כשעובדים על קבצים רלוונטיים.",
       docUrl: "https://code.claude.com/docs/en/memory", cmd: "/init",
     },
     {
       id: "plan-mode",
       title: "Plan Mode — קודם לחקור ולתכנן, אז לכתוב",
       desc: "מצב קריאה-בלבד שבו Claude מציג תוכנית מלאה לפני שנוגע בקובץ. מונע שינויים שמפספסים את הכוונה.",
-      how: "לחץ Shift+Tab באמצע שיחה כדי להיכנס ל-Plan Mode (או claude --permission-mode plan). קרא את התוכנית, בקש תיקונים, ורק אז אשר. חשוב: אם אתה מאשר בלי לקרוא — אתה משלם את המחיר בלי הערך. או שקורא, או שלא משתמש ב-Plan Mode למשימה הזו.",
+      how: "לחץ Shift+Tab באמצע שיחה כדי להיכנס ל-Plan Mode (או claude --permission-mode plan, או קידומת /plan לפרומפט בודד). קרא את התוכנית, בקש תיקונים, ורק אז אשר. חשוב: אם אתה מאשר בלי לקרוא — אתה משלם את המחיר בלי הערך. (המצב הרגיל נקרא היום 'Manual' בממשק.)",
       docUrl: "https://code.claude.com/docs/en/permission-modes", cmd: "Shift+Tab",
+    },
+    {
+      id: "auto-mode",
+      title: "Auto mode — ריצה אוטונומית בטוחה",
+      desc: "מודל-מסווג נפרד בודק כל פעולה של Claude וחוסם מסוכנות (הסלמת הרשאות, תשתית לא-מוכרת, פעולות מונעות-injection) — כך Claude רץ רצפים ארוכים בלי לעצור אותך לאישור בכל צעד.",
+      how: "הפעל עם `claude --permission-mode auto` (או בחר Auto בתפריט המצבים). זו דרך הביניים המומלצת בין Manual (מאשר כל פעולה) ל-bypassPermissions (מדלג על הכל). דוגמה חיה: בסשן שבנה את המערכת הזו, Auto mode חסם יצירת repo ציבורי — כי 'לפרסם לעולם' היא החלטה שצריכה אדם.",
+      docUrl: "https://code.claude.com/docs/en/permission-modes", cmd: "--permission-mode auto",
     },
     {
       id: "self-verify",
       title: "תן לסוכן דרך לאמת את עצמו",
       desc: "לוודא שיש לולאת משוב אמיתית — טסט שירוץ, סקרינשוט, פקודה — לא רק 'נראה לי שזה עובד'.",
-      how: "בקש מפורשות: \"כתוב טסט שמאמת את זה, הרץ אותו, ותקן עד שהוא עובר\". לפיצ'ר UI: \"הרץ את האפליקציה, צלם סקרינשוט, והשווה למה שביקשתי\". תן לו את הפקודה המדויקת לשחזר בעיה (למשל npm test) כדי שיקבל stack trace אמיתי במקום לנחש.",
+      how: "בקש מפורשות: \"כתוב טסט שמאמת את זה, הרץ אותו, ותקן עד שהוא עובר\". לפיצ'ר UI: \"הרץ את האפליקציה, צלם סקרינשוט, והשווה למה שביקשתי\". תן לו את הפקודה המדויקת לשחזר בעיה (למשל npm test) כדי שיקבל stack trace אמיתי במקום לנחש. לאכיפה קשיחה: Stop hook שמריץ טסטים בסיום ולא נותן ל-Claude לעצור עד שהם עוברים.",
       docUrl: "https://code.claude.com/docs/en/common-workflows",
     },
     {
@@ -49,8 +56,8 @@ window.BASELINE = {
       id: "subagents",
       title: "Subagents לחקירה ולמשימות צדדיות",
       desc: "'עוזר' נפרד עם context משלו שרץ משימה ומחזיר רק סיכום — שומר את השיחה הראשית נקייה וחוסך עלות.",
-      how: "בקש: \"use a subagent to investigate how our auth handles token refresh\". לשימוש חוזר — הגדר subagent קבוע עם /agents (שם, תיאור, אילו כלים מותרים לו). Claude מחליט מתי להאציל לפי התיאור, אז כתוב תיאור ברור.",
-      docUrl: "https://code.claude.com/docs/en/sub-agents", cmd: "/agents",
+      how: "בקש: \"use a subagent to investigate how our auth handles token refresh\". לשימוש חוזר — פשוט בקש מ-Claude \"create a subagent for X\", או הוסף קובץ ב-.claude/agents/ (שם, תיאור, אילו כלים מותרים). (מ-v2.1.198 הפקודה /agents כבר לא פותחת בונה אינטראקטיבי — מפנה לבקש מ-Claude.) כתוב תיאור ברור — לפיו Claude מחליט מתי להאציל.",
+      docUrl: "https://code.claude.com/docs/en/sub-agents",
     },
     {
       id: "skills",
@@ -90,8 +97,8 @@ window.BASELINE = {
     {
       id: "model",
       title: "בחירת מודל וניהול עלות",
-      desc: "להתאים מודל למשימה: Opus (חזק, יקר), Sonnet (איזון, ברירת מחדל), Haiku (מהיר, זול). מודל לא מתאים = בזבוז או כישלון.",
-      how: "כלל אצבע: Sonnet כברירת מחדל. משימה קשה (שינויים חוצי-קבצים, תכנון ארוך) → Opus. משימה פשוטה בנפח גבוה (סיווג, סיכום) → Haiku. ב-Claude Code החלף עם /model. טריק: תן ל-subagents לרוץ על Haiku לחקירה, ושמור את Opus למשימה הראשית.",
+      desc: "להתאים מודל למשימה. הסולם (יולי 2026): Fable 5 (דגל עליון) · Opus 4.8 (reasoning/קוד הכי קשה) · Sonnet 5 (איזון, ברירת מחדל) · Haiku 4.5 (מהיר, זול). מודל לא מתאים = בזבוז או כישלון.",
+      how: "כלל אצבע: Sonnet כברירת מחדל. משימה קשה (שינויים חוצי-קבצים, reasoning מורכב) → Opus/Fable. נפח גבוה ופשוט (סיווג, סיכום) → Haiku. ב-Claude Code החלף עם /model. **לפני שמחליפים מודל** — כוונן את פרמטר ה-effort (ברירת מחדל high; xhigh מומלץ לקוד); לרוב זה מנוף טוב יותר. טריק: subagents על Haiku לחקירה, Opus למשימה הראשית.",
       docUrl: "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model", cmd: "/model",
     },
     {
